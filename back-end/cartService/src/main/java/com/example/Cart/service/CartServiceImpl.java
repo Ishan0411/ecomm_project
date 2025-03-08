@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,11 +65,21 @@ public class CartServiceImpl implements CartService{
         return CommonResponse.success(null, 200, "Item Quantity Updated");
     }
 
+    @Transactional
     public CommonResponse<String> clearCart(Long userId) {
         log.info("Clearing cart for user id: {}", userId);
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user id: " + userId));
-        cartItemRepository.deleteAll(cart.getItems());
+
+        List<CartItem> items = cartItemRepository.findByCart_Id(cart.getId());
+
+        if (items.isEmpty()) {
+            log.info("No items to delete for cart id: {}", cart.getId());
+        } else {
+            cartItemRepository.deleteAll(items);
+            log.info("Deleted {} items from cart id: {}", items.size(), cart.getId());
+        }
+
         return CommonResponse.success(null, 200, "Cart cleared");
     }
 

@@ -1,63 +1,89 @@
 package com.ishan_bhat.ProductService.service;
 
+import com.ishan_bhat.ProductService.dto.ProductDto;
 import com.ishan_bhat.ProductService.entity.Product;
 import com.ishan_bhat.ProductService.exception.ResourceNotFoundException;
 import com.ishan_bhat.ProductService.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
 
-    @Autowired
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public ProductDto createProduct(ProductDto productDto) {
+        Product product = convertToEntity(productDto);
+        Product savedProduct = productRepository.save(product);
+        return getProductById(savedProduct.getId());
     }
 
-    public Product getProductById(Integer id) {
-        return productRepository.findById(id)
+    public ProductDto getProductById(Long id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        return convertToDto(product);
     }
 
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
+    public List<ProductDto> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
-//    public Product updateProduct(Integer id, Product productDetails) {
-//        Product product = getProductById(id); // Ensure product exists
-//        product.setCategoryId(productDetails.getCategoryId());
-//        product.setName(productDetails.getName());
-//        product.setDescription(productDetails.getDescription());
-//        product.setImages(productDetails.getImages());
-//        return productRepository.save(product);
-//    }
-    public Product updateProduct(Integer id, Product productDetails) {
-        Product product = getProductById(id);
+    public ProductDto updateProduct(Long id, ProductDto productDtoDetails) {
+        Product productEntity = getProductByIdEntity(id);
 
-        if (productDetails.getName() != null) {
-            product.setName(productDetails.getName());
+        if (productDtoDetails.getName() != null) {
+            productEntity.setName(productDtoDetails.getName());
         }
-        if (productDetails.getDescription() != null) {
-            product.setDescription(productDetails.getDescription());
+        if (productDtoDetails.getDescription() != null) {
+            productEntity.setDescription(productDtoDetails.getDescription());
         }
-        if (productDetails.getImages() != null) {
-            product.setImages(productDetails.getImages());
+        if (productDtoDetails.getImages() != null) {
+            productEntity.setImages(productDtoDetails.getImages());
         }
-        // categoryId intentionally NOT updated here in PATCH
+        if (productDtoDetails.getCategoryId() != null) {
+            productEntity.setCategoryId(productDtoDetails.getCategoryId());
+        }
 
-        return productRepository.save(product);
+        Product updatedProduct = productRepository.save(productEntity);
+        return convertToDto(updatedProduct);
     }
 
-    public void deleteProduct(Integer id) {
-        Product product = getProductById(id); // Ensure product exists
+    public void deleteProduct(Long id) {
+        Product product = getProductByIdEntity(id);
         productRepository.delete(product);
+    }
+
+    private ProductDto convertToDto(Product product) {
+        return new ProductDto(
+                product.getId(),
+                product.getCategoryId(),
+                product.getName(),
+                product.getDescription(),
+                product.getImages()
+        );
+    }
+
+    private Product convertToEntity(ProductDto productDto) {
+        Product product = new Product();
+        product.setId(productDto.getId());
+        product.setCategoryId(productDto.getCategoryId());
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setImages(productDto.getImages());
+        return product;
+    }
+
+    private Product getProductByIdEntity(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
     }
 }

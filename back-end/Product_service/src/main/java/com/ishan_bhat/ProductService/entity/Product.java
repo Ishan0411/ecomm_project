@@ -20,10 +20,10 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "category_id")
-    private Integer categoryId;
+    private Long categoryId;
 
     @Column(name = "name")
     private String name;

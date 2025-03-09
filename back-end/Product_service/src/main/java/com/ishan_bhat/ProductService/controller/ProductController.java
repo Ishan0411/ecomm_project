@@ -1,12 +1,14 @@
 package com.ishan_bhat.ProductService.controller;
 
-import com.ishan_bhat.ProductService.entity.Product;
+import com.ishan_bhat.ProductService.dto.ProductDto;
 import com.ishan_bhat.ProductService.service.ProductService;
+import com.ishan_bhat.ProductService.utils.CommonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -15,39 +17,37 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<CommonResponse<List<ProductDto>>> getAllProducts() {
+        List<ProductDto> products = productService.getAllProducts();
+        return ResponseEntity.ok(CommonResponse.success(products, HttpStatus.OK.value(), "Products fetched successfully"));
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable Integer productId) {
-        return ResponseEntity.ok(productService.getProductById(productId));
+    public ResponseEntity<CommonResponse<ProductDto>> getProductById(@PathVariable Long productId) {
+        ProductDto product = productService.getProductById(productId);
+        return ResponseEntity.ok(CommonResponse.success(product, HttpStatus.OK.value(), "Product fetched successfully"));
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        return new ResponseEntity<>(productService.createProduct(product), HttpStatus.CREATED);
+    public ResponseEntity<CommonResponse<ProductDto>> createProduct(@Valid @RequestBody ProductDto productDto) {
+        ProductDto createdProduct = productService.createProduct(productDto);
+        return new ResponseEntity<>(CommonResponse.success(createdProduct, HttpStatus.CREATED.value(), "Product created successfully"), HttpStatus.CREATED);
     }
-
-//    @PatchMapping("/{productId}")
-//    public ResponseEntity<Product> updateProduct(@PathVariable Integer productId, @RequestBody Product productDetails) {
-//        return ResponseEntity.ok(productService.updateProduct(productId, productDetails));
-//    }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Integer productId, @RequestBody Product productDetails) {
-        Product updatedProduct = productService.updateProduct(productId, productDetails);
-        return ResponseEntity.ok(updatedProduct);
+    public ResponseEntity<CommonResponse<ProductDto>> updateProduct(@PathVariable Long productId, @Valid @RequestBody ProductDto productDtoDetails) {
+        ProductDto updatedProduct = productService.updateProduct(productId, productDtoDetails);
+        return ResponseEntity.ok(CommonResponse.success(updatedProduct, HttpStatus.OK.value(), "Product updated successfully"));
     }
+
     @DeleteMapping("/{productId}")
-    public ResponseEntity<HttpStatus> deleteProduct(@PathVariable Integer productId) {
+    public ResponseEntity<CommonResponse<Void>> deleteProduct(@PathVariable Long productId) {
         productService.deleteProduct(productId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build(); // No content for delete, response is CommonResponse<Void> or HttpStatus.NO_CONTENT
     }
 }

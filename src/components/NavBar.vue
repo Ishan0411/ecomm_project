@@ -92,18 +92,28 @@ export default {
   
   methods: {
     ...mapActions(useUserStore, ['logout', 'initializeUser']),
-    
-    handleSearch() {
-      if (this.searchQuery.trim()) {
-        alert('Search functionality coming soon!');
-      }
-    },
+  
     
     handleSignOut() {
       this.logout();
       this.$router.push('/signin');
     }
   },
+
+  handleSearch() {
+        if (this.searchQuery.trim()) {
+          this.$router.push({ name: 'PLP', query: { q: this.searchQuery } });
+        }
+      },
+  
+
+    watch: {
+        searchQuery(newQuery) {
+            if (newQuery.trim()){
+                this.$router.replace({ name: 'PLP', query: { q: newQuery } });
+            }
+        }
+    },
   
   mounted() {
     // Initialize user from localStorage when component mounts

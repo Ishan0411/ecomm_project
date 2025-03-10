@@ -1,13 +1,15 @@
-// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 
 // Import components
 import SignIn from '@/views/SignIn.vue';
 import SignUp from '@/views/SignUp.vue';
-import HomePage from '@/views/HomePage.vue'; // We'll create this
+import HomePage from '@/views/HomePage.vue'; 
+import PLP from '@/views/PLP.vue';
+import orders from '@/views/orders.vue';
+import cart from '@/views/cart.vue'; // We'll create this
+import checkout from '@/views/checkout.vue';
 
-// Define routes
 const routes = [
   {
     path: '/',
@@ -28,18 +30,24 @@ const routes = [
     meta: { guestOnly: true }
   },
   {
+    path: '/PLP',
+    name: 'PLP',
+    component: PLP,
+  },
+  {
     path: '/orders',
     name: 'Orders',
-    // Using an inline component for now
-    component: { template: '<div><h1>Orders</h1><p>Your orders will appear here.</p></div>' },
-    meta: { requiresAuth: true }
+    component: orders,
   },
   {
     path: '/cart',
     name: 'Cart',
-    // Using an inline component for now
-    component: { template: '<div><h1>Cart</h1><p>Your shopping cart will appear here.</p></div>' },
-    meta: { requiresAuth: true }
+    component: cart,
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: checkout,
   },
   {
     path: '/:pathMatch(.*)*',

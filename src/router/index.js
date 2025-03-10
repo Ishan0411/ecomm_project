@@ -5,7 +5,8 @@ import { useUserStore } from '@/stores/userStore';
 // Import components
 import SignIn from '@/views/SignIn.vue';
 import SignUp from '@/views/SignUp.vue';
-import HomePage from '@/views/HomePage.vue'; // We'll create this
+import HomePage from '@/views/HomePage.vue'; 
+import ProductDetail from '@/views/ProductDetail.vue';
 
 // Define routes
 const routes = [
@@ -13,7 +14,7 @@ const routes = [
     path: '/',
     name: 'Home',
     component: HomePage,
-    meta: { requiresAuth: true } // Require authentication for home page
+    // meta: { requiresAuth: true } // Require authentication for home page
   },
   {
     path: '/signin',
@@ -28,6 +29,13 @@ const routes = [
     meta: { guestOnly: true }
   },
   {
+    path: '/product/:id',
+    name: 'ProductDetail',
+    component: ProductDetail,
+    props: true,
+    // meta: { requiresAuth: true }
+  },
+  {
     path: '/orders',
     name: 'Orders',
     // Using an inline component for now
@@ -39,7 +47,7 @@ const routes = [
     name: 'Cart',
     // Using an inline component for now
     component: { template: '<div><h1>Cart</h1><p>Your shopping cart will appear here.</p></div>' },
-    meta: { requiresAuth: true }
+    //meta: { requiresAuth: true }
   },
   {
     path: '/:pathMatch(.*)*',
@@ -67,6 +75,7 @@ router.beforeEach((to, from, next) => {
     // Redirect to login
     next({ name: 'SignIn' });
   } 
+  
   // Check if route is for guests only (like login/register)
   else if (to.meta.guestOnly && userStore.isAuthenticated) {
     // Redirect authenticated users to home

@@ -99,7 +99,7 @@ export const useUserStore = defineStore('user', {
           password // In a real app, this would be hashed on the server
         };
         
-        mockUsers.push(newUser);
+        mockUsers.push(newUser); //Here also, an API Call will be required to send data to backend
         localStorage.setItem('users', JSON.stringify(mockUsers));
         
         return { success: true };

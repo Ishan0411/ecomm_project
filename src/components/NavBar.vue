@@ -2,7 +2,7 @@
   <nav class="navbar">
     <!-- Company Logo (Always visible) -->
     <router-link to="/" class="logo">
-      <div class="logo-text"><img src="https://logowik.com/content/uploads/images/bliblicom1753.jpg" heght = "70" width="90"></div>
+      <div class="logo-text"><img src="@/assets/blibli.png" width="90" /></div>
     </router-link>
 
     <!-- Show full navbar only for logged-in users -->
@@ -10,18 +10,16 @@
       <div class="navbar-content">
         <!-- Search Bar -->
         <div class="search-container">
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search products..." 
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search products..."
             v-model="searchQuery"
             @keyup.enter="handleSearch"
           />
-          <button class="search-button" @click="handleSearch">
-            Search
-          </button>
+          <button class="search-button" @click="handleSearch">Search</button>
         </div>
-        
+
         <div class="navbar-right">
           <!-- Account Section -->
           <div class="nav-item">
@@ -31,13 +29,13 @@
                 <span class="nav-link-text">Account</span>
               </div>
             </div>
-            
+
             <!-- Dropdown for account actions -->
             <div class="account-dropdown">
               <button class="signout-button" @click="handleSignOut">Sign Out</button>
             </div>
           </div>
-          
+
           <!-- Orders -->
           <div class="nav-item">
             <router-link to="/orders" class="nav-link">
@@ -47,22 +45,63 @@
               </div>
             </router-link>
           </div>
-          
+
           <!-- Cart -->
           <div class="nav-item cart">
             <router-link to="/cart" class="nav-link">
               <span class="cart-icon">
                 Cart
-                <span class="cart-count">0</span>
+                <span class="cart-count">{{ totalItems }}</span>
               </span>
             </router-link>
           </div>
         </div>
       </div>
     </template>
-    
+
     <!-- Show just Sign In link for non-logged-in users -->
     <template v-else>
+      <div class="navbar-content">
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search products..."
+            v-model="searchQuery"
+            @keyup.enter="handleSearch"
+          />
+          <button class="search-button" @click="handleSearch">Search</button>
+        </div>
+
+        <div class="navbar-right">
+          <!-- Account Section -->
+          <div class="nav-item">
+            <div class="nav-link">
+              <div class="nav-text">
+                <span class="nav-greeting">Hello, {{ userName }}</span>
+                <!-- <span class="nav-link-text">Account</span> -->
+              </div>
+            </div>
+
+            <!-- //Dropdown for account actions -->
+            <!-- <div class="account-dropdown">
+              <router-link to="/signin" class="signin-button">Sign In</router-link>
+            </div> -->
+          </div>
+
+          <!-- Cart -->
+          <div class="nav-item cart">
+            <router-link to="/cart" class="nav-link">
+              <span class="cart-icon">
+                Cart
+                <span class="cart-count">{{ totalItems }}</span>
+              </span>
+            </router-link>
+          </div>
+        </div>
+      </div>
+
       <div class="signin-button-container">
         <router-link to="/signin" class="signin-button">Sign In</router-link>
       </div>
@@ -71,45 +110,47 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia';
-import { useUserStore } from '@/stores/userStore';
+import { mapState, mapActions } from 'pinia'
+import { useUserStore } from '@/stores/userStore'
+import { useCartStore } from '@/stores/cartStore'
 
 export default {
   name: 'NavBar',
-  
+
   data() {
     return {
-      searchQuery: ''
-    };
+      searchQuery: '',
+    }
   },
-  
+
   computed: {
     ...mapState(useUserStore, {
       loggedIn: 'loggedIn',
-      userName: 'userName'
-    })
+      userName: 'userName',
+    }),
+    ...mapState(useCartStore, ['totalItems']),
   },
-  
+
   methods: {
     ...mapActions(useUserStore, ['logout', 'initializeUser']),
-    
+
     handleSearch() {
       if (this.searchQuery.trim()) {
-        alert('Search functionality coming soon!');
+        alert('Search functionality coming soon!')
       }
     },
-    
+
     handleSignOut() {
-      this.logout();
-      this.$router.push('/signin');
-    }
+      this.logout()
+      this.$router.push('/signin')
+    },
   },
-  
+
   mounted() {
     // Initialize user from localStorage when component mounts
-    this.initializeUser();
-  }
-};
+    this.initializeUser()
+  },
+}
 </script>
 
 <style scoped>
@@ -143,16 +184,6 @@ export default {
 
 .signin-button-container {
   margin-left: auto;
-}
-
-.signin-button {
-  background-color: #2789f2;
-  color: #111;
-  border: 1px solid #a88734;
-  padding: 0.5rem 1rem;
-  border-radius: 3px;
-  text-decoration: none;
-  font-weight: bold;
 }
 
 .signin-button:hover {
@@ -249,6 +280,7 @@ export default {
   padding: 0.5rem;
   z-index: 10;
   display: none;
+  /*min-width: 120px; Add this to ensure adequate width */
 }
 
 .nav-item:hover .account-dropdown {
@@ -256,6 +288,18 @@ export default {
 }
 
 .signout-button {
+  color: white;
+  background-color: #2789f2;
+  border: 1px solid lightblue;
+  border-radius: 3px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.signin-button {
+  color: white;
   background-color: #2789f2;
   border: 1px solid lightblue;
   border-radius: 3px;

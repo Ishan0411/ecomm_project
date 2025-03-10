@@ -1,14 +1,16 @@
-// src/router/index.js
-import { createRouter, createWebHistory } from 'vue-router';
-import { useUserStore } from '@/stores/userStore';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 
 // Import components
-import SignIn from '@/views/SignIn.vue';
-import SignUp from '@/views/SignUp.vue';
-import HomePage from '@/views/HomePage.vue'; 
-import ProductDetail from '@/views/ProductDetail.vue';
+import SignIn from '@/views/SignIn.vue'
+import SignUp from '@/views/SignUp.vue'
+import HomePage from '@/views/HomePage.vue'
+import ProductDetail from '@/views/ProductDetail.vue'
+import PLP from '@/views/PLP.vue'
+import orders from '@/views/orders.vue'
+import cart from '@/views/cart.vue' // We'll create this
+import checkout from '@/views/checkout.vue'
 
-// Define routes
 const routes = [
   {
     path: '/',
@@ -20,13 +22,13 @@ const routes = [
     path: '/signin',
     name: 'SignIn',
     component: SignIn,
-    meta: { guestOnly: true }
+    meta: { guestOnly: true },
   },
   {
     path: '/signup',
     name: 'SignUp',
     component: SignUp,
-    meta: { guestOnly: true }
+    meta: { guestOnly: true },
   },
   {
     path: '/product/:id',
@@ -34,13 +36,14 @@ const routes = [
     component: ProductDetail,
     props: true,
     // meta: { requiresAuth: true }
+    path: '/PLP',
+    name: 'PLP',
+    component: PLP,
   },
   {
     path: '/orders',
     name: 'Orders',
-    // Using an inline component for now
-    component: { template: '<div><h1>Orders</h1><p>Your orders will appear here.</p></div>' },
-    meta: { requiresAuth: true }
+    component: orders,
   },
   {
     path: '/cart',
@@ -48,43 +51,50 @@ const routes = [
     // Using an inline component for now
     component: { template: '<div><h1>Cart</h1><p>Your shopping cart will appear here.</p></div>' },
     //meta: { requiresAuth: true }
+    component: cart,
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: checkout,
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: { template: '<div><h1>Page Not Found</h1><p>The page you requested does not exist.</p></div>' }
-  }
-];
+    component: {
+      template: '<div><h1>Page Not Found</h1><p>The page you requested does not exist.</p></div>',
+    },
+  },
+]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-});
+  routes,
+})
 
 // Navigation guards
 router.beforeEach((to, from, next) => {
-  const userStore = useUserStore();
-  
+  const userStore = useUserStore()
+
   // Initialize user from localStorage if not already done
   if (!userStore.user) {
-    userStore.initializeUser();
+    userStore.initializeUser()
   }
-  
+
   // Check if route requires authentication
   if (to.meta.requiresAuth && !userStore.isAuthenticated) {
     // Redirect to login
-    next({ name: 'SignIn' });
-  } 
-  
+    next({ name: 'SignIn' })
+  }
+
   // Check if route is for guests only (like login/register)
   else if (to.meta.guestOnly && userStore.isAuthenticated) {
     // Redirect authenticated users to home
-    next({ name: 'Home' });
-  } 
-  else {
+    next({ name: 'Home' })
+  } else {
     // Normal navigation
-    next();
+    next()
   }
-});
+})
 
-export default router;
+export default router

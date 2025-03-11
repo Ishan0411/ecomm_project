@@ -5,6 +5,8 @@ import api from '@/services/apiService'
 export const useCartStore = defineStore('cart', {
   state: () => ({
     items: [],
+    cartId: null,
+    userId: 3, // For testing - ideally this would come from a user store
     loading: false,
     error: null,
   }),
@@ -30,9 +32,28 @@ export const useCartStore = defineStore('cart', {
       this.error = null
 
       try {
-        const response = await api.get('/1')
-        this.items = response.data || []
-        this.saveCart() // Backup to localStorage
+        // Using hardcoded userId for testing (adjust as needed)
+        const response = await api.get(`/carts/${this.userId}`)
+
+        if (response.data) {
+          // Store cart ID from response
+          this.cartId = response.data.id
+
+          // Store items from response
+          // this.items = response.data.items || []
+          // Transform the data to match expected format
+          this.items = (response.data.items || []).map((item) => ({
+            id: item.id,
+            productId: item.productOfferingId,
+            quantity: item.quantity,
+            name: item.productName, // Map productName to name
+            price: item.price,
+            image: item.imageUrl, // Map imageUrl to image
+          }))
+
+          this.saveCart() // Backup to localStorage
+        }
+
         return this.items
       } catch (error) {
         console.error('Error fetching cart:', error)
@@ -47,83 +68,94 @@ export const useCartStore = defineStore('cart', {
     // Add item to cart
     async addToCart(product) {
       this.loading = true
+      this.error = null
 
       try {
-        // First update locally
-        const existingItem = this.items.find((item) => item.id === product.id)
-
-        if (existingItem) {
-          existingItem.quantity += 1
-        } else {
-          this.items.push({
-            ...product,
-            quantity: 1,
-          })
+        const itemDto = {
+          productOfferingId: product.id, // Make sure this matches your DTO
+          quantity: 1,
+          productName: product.name,
+          price: product.price,
+          imageUrl: product.imageUrl || product.image,
         }
 
-        // Then sync with server
-        await api.post('/cart/add', {
-          productId: product.id,
-          quantity: existingItem ? existingItem.quantity : 1,
-        })
+        // Using correct endpoint to add item to cart
+        const response = await api.post(`/carts/${this.userId}/items`, itemDto)
 
-        this.saveCart()
+        if (response.success) {
+          // Refresh the cart to get the updated state from server
+          await this.fetchCart()
+        }
+
+        return true
       } catch (error) {
         console.error('Error adding to cart:', error)
         this.error = error.message
+        return false
       } finally {
         this.loading = false
       }
     },
 
     // Remove item from cart
-    async removeFromCart(productId) {
+    async removeFromCart(itemId) {
       this.loading = true
+      this.error = null
 
       try {
-        const index = this.items.findIndex((item) => item.id === productId)
+        // Using correct endpoint to remove item from cart
+        const response = await api.delete(`/carts/${this.userId}/items/${itemId}`)
 
-        if (index !== -1) {
-          this.items.splice(index, 1)
-
-          // Sync with server
-          await api.delete(`/cart/remove/${productId}`)
-
-          this.saveCart()
+        if (response.success) {
+          // Remove from local state
+          const index = this.items.findIndex((item) => item.id === itemId)
+          if (index !== -1) {
+            this.items.splice(index, 1)
+            this.saveCart()
+          }
         }
+
+        return true
       } catch (error) {
         console.error('Error removing from cart:', error)
         this.error = error.message
+        return false
       } finally {
         this.loading = false
       }
     },
 
     // Update item quantity
-    async updateQuantity(productId, quantity) {
+    async updateQuantity(itemId, quantity) {
       this.loading = true
+      this.error = null
 
       try {
-        const item = this.items.find((item) => item.id === productId)
-
-        if (item) {
-          item.quantity = quantity
-
-          if (item.quantity <= 0) {
-            return this.removeFromCart(productId)
-          }
-
-          // Sync with server
-          await api.put(`/cart/update`, {
-            productId,
-            quantity,
-          })
-
-          this.saveCart()
+        if (quantity <= 0) {
+          return this.removeFromCart(itemId)
         }
+
+        const itemDto = {
+          quantity: quantity,
+        }
+
+        // Using correct endpoint to update item in cart
+        const response = await api.put(`/carts/${this.userId}/items/${itemId}`, itemDto)
+
+        if (response.success) {
+          // Update local state
+          const item = this.items.find((item) => item.id === itemId)
+          if (item) {
+            item.quantity = quantity
+            this.saveCart()
+          }
+        }
+
+        return true
       } catch (error) {
         console.error('Error updating cart:', error)
         this.error = error.message
+        return false
       } finally {
         this.loading = false
       }
@@ -132,17 +164,22 @@ export const useCartStore = defineStore('cart', {
     // Clear the entire cart
     async clearCart() {
       this.loading = true
+      this.error = null
 
       try {
-        this.items = []
+        // Using correct endpoint to clear cart
+        const response = await api.delete(`/carts/${this.userId}`)
 
-        // Sync with server
-        await api.delete('/cart/clear')
+        if (response.success) {
+          this.items = []
+          this.saveCart()
+        }
 
-        this.saveCart()
+        return true
       } catch (error) {
         console.error('Error clearing cart:', error)
         this.error = error.message
+        return false
       } finally {
         this.loading = false
       }
@@ -151,12 +188,19 @@ export const useCartStore = defineStore('cart', {
     // Local storage methods (for offline support)
     saveCart() {
       localStorage.setItem('cart', JSON.stringify(this.items))
+      localStorage.setItem('cartId', this.cartId)
     },
 
     loadCart() {
       const savedCart = localStorage.getItem('cart')
+      const savedCartId = localStorage.getItem('cartId')
+
       if (savedCart) {
         this.items = JSON.parse(savedCart)
+      }
+
+      if (savedCartId) {
+        this.cartId = savedCartId
       }
     },
   },

@@ -1,37 +1,33 @@
 // src/services/apiService.js
 import axios from 'axios'
 
-// Create base API instance
+// Create base API instance with correct base URL
 const api = axios.create({
-  baseURL: 'http://localhost:8082/carts', // Replace with your actual API base URL
-  timeout: 15000, // 15 second timeout
+  baseURL: 'http://localhost:8082', // Remove /carts from base URL
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// Add a response interceptor to handle CommonResponse format
+// Rest of your interceptors remain the same
 api.interceptors.response.use(
   (response) => {
     const commonResponse = response.data
-
     // Validate the CommonResponse format
     if (commonResponse === null || typeof commonResponse !== 'object') {
       return Promise.reject(new Error('Invalid response format'))
     }
-
     //Check if request was successful based on the success flag
     if (!commonResponse.success) {
       return Promise.reject(new Error(commonResponse.message || 'Request failed'))
     }
-
     // If statusCode indicates an error
     if (commonResponse.statusCode >= 400) {
       return Promise.reject(
         new Error(commonResponse.message || `HTTP Error: ${commonResponse.statusCode}`),
       )
     }
-
     // Return the standardized response
     return commonResponse
   },

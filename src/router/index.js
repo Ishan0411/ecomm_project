@@ -5,11 +5,11 @@ import { useUserStore } from '@/stores/userStore'
 import SignIn from '@/views/SignIn.vue'
 import SignUp from '@/views/SignUp.vue'
 import HomePage from '@/views/HomePage.vue'
-import ProductDetail from '@/views/ProductDetail.vue'
 import PLP from '@/views/PLP.vue'
 import orders from '@/views/orders.vue'
 import cart from '@/views/cart.vue' // We'll create this
 import checkout from '@/views/checkout.vue'
+import ProductDetail from '@/views/ProductDetail.vue'
 
 const routes = [
   {
@@ -31,14 +31,16 @@ const routes = [
     meta: { guestOnly: true },
   },
   {
+    path: '/PLP',
+    name: 'PLP',
+    component: PLP,
+  },
+  {
     path: '/product/:id',
     name: 'ProductDetail',
     component: ProductDetail,
     props: true,
     // meta: { requiresAuth: true }
-    path: '/PLP',
-    name: 'PLP',
-    component: PLP,
   },
   {
     path: '/orders',
@@ -48,9 +50,6 @@ const routes = [
   {
     path: '/cart',
     name: 'Cart',
-    // Using an inline component for now
-    component: { template: '<div><h1>Cart</h1><p>Your shopping cart will appear here.</p></div>' },
-    //meta: { requiresAuth: true }
     component: cart,
   },
   {

@@ -96,39 +96,40 @@ export default {
 
   async mounted() {
     this.isLoading = true
+    // this.fetchCart()
     try {
       await this.fetchCart()
 
       // If cart is empty and you want mock data for testing
-      if (this.cartItems.length === 0) {
-        // Mock data for testing
-        // const mockData = [
-        //   {
-        //     id: 1,
-        //     name: "iPhone 15 Pro Max",
-        //     price: 149999,
-        //     quantity: 1,
-        //     image: "https://m.media-amazon.com/images/I/81CgtwSII3L._AC_UL480_FMwebp_QL65_.jpg"
-        //   },
-        //   {
-        //     id: 2,
-        //     name: "AirPods Pro (2nd Gen)",
-        //     price: 24999,
-        //     quantity: 2,
-        //     image: "https://m.media-amazon.com/images/I/61SUj2aKoEL._AC_UL480_FMwebp_QL65_.jpg"
-        //   },
-        //   {
-        //     id: 3,
-        //     name: "MacBook Pro M2",
-        //     price: 189999,
-        //     quantity: 1,
-        //     image: "https://m.media-amazon.com/images/I/71-Vbp1LkgL._AC_UL480_FMwebp_QL65_.jpg"
-        //   }
-        // ];
-        // Comment this out when connecting to a real backend
-        // this.$pinia.state.value.cart.items = mockData;
-        // useCartStore().saveCart();
-      }
+      // if (this.cartItems.length === 0) {
+      //     // Mock data for testing
+      //     // const mockData = [
+      //     //   {
+      //     //     id: 1,
+      //     //     name: "iPhone 15 Pro Max",
+      //     //     price: 149999,
+      //     //     quantity: 1,
+      //     //     image: "https://m.media-amazon.com/images/I/81CgtwSII3L._AC_UL480_FMwebp_QL65_.jpg"
+      //     //   },
+      //     //   {
+      //     //     id: 2,
+      //     //     name: "AirPods Pro (2nd Gen)",
+      //     //     price: 24999,
+      //     //     quantity: 2,
+      //     //     image: "https://m.media-amazon.com/images/I/61SUj2aKoEL._AC_UL480_FMwebp_QL65_.jpg"
+      //     //   },
+      //     //   {
+      //     //     id: 3,
+      //     //     name: "MacBook Pro M2",
+      //     //     price: 189999,
+      //     //     quantity: 1,
+      //     //     image: "https://m.media-amazon.com/images/I/71-Vbp1LkgL._AC_UL480_FMwebp_QL65_.jpg"
+      //     //   }
+      //     // ];
+      //     // Comment this out when connecting to a real backend
+      //     // this.$pinia.state.value.cart.items = mockData;
+      //     // useCartStore().saveCart();
+      //   }
     } catch (err) {
       this.error = err.message
     } finally {

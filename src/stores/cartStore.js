@@ -6,7 +6,7 @@ export const useCartStore = defineStore('cart', {
   state: () => ({
     items: [],
     cartId: null,
-    userId: 3, // For testing - ideally this would come from a user store
+    userId: 4, // For testing - ideally this would come from a user store
     loading: false,
     error: null,
   }),
@@ -27,38 +27,44 @@ export const useCartStore = defineStore('cart', {
 
   actions: {
     // Fetch cart from server
+    // Add these debugging lines to your fetchCart method
     async fetchCart() {
       this.loading = true
       this.error = null
 
+      console.log('Starting fetchCart for userId:', this.userId)
+
       try {
-        // Using hardcoded userId for testing (adjust as needed)
+        console.log('Making request to:', `/carts/${this.userId}`)
         const response = await api.get(`/carts/${this.userId}`)
 
-        if (response.data) {
+        console.log('Cart API response:', response)
+
+        if (response) {
+          // Changed from response.data since your interceptor already returns the data
           // Store cart ID from response
-          this.cartId = response.data.id
+          this.cartId = response.id || response.data?.id
+          console.log('Cart ID set to:', this.cartId)
 
           // Store items from response
-          // this.items = response.data.items || []
-          // Transform the data to match expected format
-          this.items = (response.data.items || []).map((item) => ({
+          this.items = (response.items || response.data?.items || []).map((item) => ({
             id: item.id,
             productId: item.productOfferingId,
             quantity: item.quantity,
-            name: item.productName, // Map productName to name
+            name: item.productName,
             price: item.price,
-            image: item.imageUrl, // Map imageUrl to image
+            image: item.imageUrl,
           }))
 
-          this.saveCart() // Backup to localStorage
+          console.log('Cart items processed:', this.items)
+          this.saveCart()
         }
 
         return this.items
       } catch (error) {
-        console.error('Error fetching cart:', error)
+        console.error('Error fetching cart - DETAILS:', error)
         this.error = error.message
-        this.loadCart() // Fallback to local storage if API fails
+        this.loadCart() // Fallback to local storage
         return this.items
       } finally {
         this.loading = false
